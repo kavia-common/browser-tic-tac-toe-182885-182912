@@ -22,6 +22,68 @@ type WinnerResult = {
   line: number[] | null;
 };
 
+/**
+ * Inline SVG icons for chess pieces.
+ * We keep paths simple and balanced within a viewBox for consistent sizing.
+ */
+const iconCommon: React.CSSProperties = {
+  width: "58%",
+  height: "58%",
+  display: "block",
+  filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.12))",
+};
+
+function KnightIcon({ color, ariaLabel }: { color: string; ariaLabel: string }) {
+  return (
+    <svg
+      role="img"
+      aria-label={ariaLabel}
+      viewBox="0 0 64 64"
+      style={iconCommon}
+    >
+      <title>{ariaLabel}</title>
+      <g fill={color}>
+        {/* Base */}
+        <rect x="14" y="50" width="36" height="6" rx="3" opacity="0.9" />
+        <rect x="18" y="45" width="28" height="5" rx="2.5" opacity="0.95" />
+        {/* Simple stylized knight (horse head) */}
+        <path
+          d="M24 44c0-6 2-11 6-14l-6-5c1-4 4-8 10-10 4-1 8 0 12 2-1 2-2 3-3 4 2 1 3 3 3 5 0 4-3 7-6 7-2 0-4-1-5-2-2 2-3 3-5 5 3 2 6 5 6 8 0 3-2 5-6 5-3 0-6-2-6-5Z"
+          opacity="1"
+        />
+        {/* Eye */}
+        <circle cx="40" cy="20" r="1.6" fill="#111827" opacity="0.7" />
+      </g>
+    </svg>
+  );
+}
+
+function QueenIcon({ color, ariaLabel }: { color: string; ariaLabel: string }) {
+  return (
+    <svg
+      role="img"
+      aria-label={ariaLabel}
+      viewBox="0 0 64 64"
+      style={iconCommon}
+    >
+      <title>{ariaLabel}</title>
+      <g fill={color}>
+        {/* Base */}
+        <rect x="14" y="50" width="36" height="6" rx="3" opacity="0.9" />
+        <rect x="18" y="45" width="28" height="5" rx="2.5" opacity="0.95" />
+        {/* Crown base */}
+        <path d="M20 44h24l-2-10H22l-2 10Z" opacity="1" />
+        {/* Crown points */}
+        <path d="M22 34l5-10 5 8 5-8 5 10H22Z" opacity="1" />
+        {/* Crown jewels */}
+        <circle cx="27" cy="23" r="1.6" opacity="0.9" />
+        <circle cx="32" cy=" twenty-three" r="1.6" opacity="0.9" />
+        <circle cx="37" cy="23" r="1.6" opacity="0.9" />
+      </g>
+    </svg>
+  );
+}
+
 // PUBLIC_INTERFACE
 export function TicTacToe() {
   /**
@@ -60,9 +122,9 @@ export function TicTacToe() {
   }
 
   const statusText = (() => {
-    if (winner) return `Winner: ${winner}`;
+    if (winner) return `Winner: ${winner === "X" ? "Knight" : "Queen"}`;
     if (isDraw) return "It's a draw!";
-    return `Turn: ${xIsNext ? "X" : "O"}`;
+    return `Turn: ${xIsNext ? "Knight" : "Queen"}`;
   })();
 
   const statusColor = (() => {
@@ -87,11 +149,13 @@ export function TicTacToe() {
             {board.map((value, idx) => {
               const highlight =
                 Boolean(line) && (line as number[]).includes(idx);
+              const ariaPiece =
+                value === "X" ? "Knight" : value === "O" ? "Queen" : "Empty";
               return (
                 <button
                   key={idx}
                   onClick={() => handleClick(idx)}
-                  aria-label={`Cell ${idx + 1}`}
+                  aria-label={`Cell ${idx + 1}${value ? ` with ${ariaPiece}` : ""}`}
                   style={{
                     ...styles.cell,
                     ...(value === "X" ? styles.cellX : {}),
@@ -110,7 +174,11 @@ export function TicTacToe() {
                           : COLORS.text,
                     }}
                   >
-                    {value}
+                    {value === "X" ? (
+                      <KnightIcon color={COLORS.primary} ariaLabel="Knight" />
+                    ) : value === "O" ? (
+                      <QueenIcon color={COLORS.secondary} ariaLabel="Queen" />
+                    ) : null}
                   </span>
                 </button>
               );
